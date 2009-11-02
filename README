@@ -1,6 +1,16 @@
-sphvol.tcl - Calculates volume elements of spheroid given inputs.
+sphvol.tcl
+    Description: Calculates volume elements of spheroid given inputs. This script also defines the shape of the spheroids (clusters) as a function of radius (alpha(r)).
+    Input: shells.dat, the a-values defining the spheroids.
+    Output: volumes.out, list of the volumes of volume elements as a function of shell number and observation radius.
+    
+xspecgen.tcl
+    Description: Program for generating the xspec script used to make fake spectra. This script also defines the temperature and density -functions for the cluster.
+    Input: volumes.out, xspecgen.tcl uses the volumes calculated by sphvol.tcl to make fake mekal spectra of the hot plasma weighted by the volumes. 
+    Output: fakemekal.xspec, xspec-code for making fake spectra simulating observations of the cluster.
 
+Created in 2009 by
 Andreas Skielboe
-Niels Bohr Institute
-University of Copenhagen 2009
-skielboe@gmail.com
+Niels Bohr Institute, University of Copenhagen
+Contact: skielboe@gmail.com
+
+PS. I take no responsibility for the accidental creation of Earth-consuming black holes as a result of using this code.

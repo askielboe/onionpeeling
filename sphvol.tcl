@@ -1,9 +1,7 @@
 # Define constants
-set filenamein "test.dat"
-set filenameout "test.out"
+set filenamein "shells.dat"
+set filenameout "volumes.out"
 set Pi 3.1415926535897932385
-set alpha [expr -0.3*$Pi]
-set beta 2.4
 
 # Define procedures
 proc Ve {rc a b} {
@@ -50,8 +48,12 @@ while {![eof $fin]} {
 	# Define a(n), right now a = n
 	set a($i) [expr 1*$n($i)]
 	
+	# Define alpha(r) and beta(r)
+	set alpha($i) [expr 0.5*$n($i)]
+	set beta($i) [expr 1.*1.]
+	
 	# Define b(a) = a*(beta + alpha * a)
-	set b($i) [expr $a($i)*($beta + $alpha*$a($i))]
+	set b($i) [expr $a($i)*($beta($i) + $alpha($i)*$a($i))]
 	
 	if [eof $fin] break ;# otherwise loops one time too many
 	incr i
