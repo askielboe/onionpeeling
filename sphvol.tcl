@@ -90,7 +90,7 @@ while {$in <= $i} {
 	set im 1
 	while {$im <= $i} {	
 		if {$velement($in,$im) != 0} {
-			puts $fout "$in $im $velement($in,$im) \n"
+			puts $fout "$in $im $velement($in,$im)"
 		}
 		incr im
 	}

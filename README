@@ -7,6 +7,11 @@ xspecgen.tcl
     Description: Program for generating the xspec script used to make fake spectra. This script also defines the temperature and density -functions for the cluster.
     Input: volumes.out, xspecgen.tcl uses the volumes calculated by sphvol.tcl to make fake mekal spectra of the hot plasma weighted by the volumes. 
     Output: fakemekal.xspec, xspec-code for making fake spectra simulating observations of the cluster.
+    
+volumes.out
+    File with volume of volume elements as a function of shell number and observation.
+    Columns are (1 is the innermost):
+    Shell no. | Obs no. | Volume
 
 Created in 2009 by
 Andreas Skielboe
