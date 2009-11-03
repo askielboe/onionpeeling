@@ -4,9 +4,13 @@ sphvol.tcl
     Output: volumes.out, list of the volumes of volume elements as a function of shell number and observation radius.
     
 xspecgen.tcl
-    Description: Program for generating the xspec script used to make fake spectra. This script also defines the temperature and density -functions for the cluster.
-    Input: volumes.out, xspecgen.tcl uses the volumes calculated by sphvol.tcl to make fake mekal spectra of the hot plasma weighted by the volumes. 
-    Output: fakemekal.xspec, xspec-code for making fake spectra simulating observations of the cluster.
+    Description: Program for generating the xspec script used to make fake spectra. This script also defines the temperature and density as a function of radius of the cluster.
+    Input: volumes.out: using the volumes calculated by sphvol.tcl to make fake mekal spectra of the hot plasma weighted by the volumes. 
+    Output: xspecgen_script(1-number of shells).xcm, xspecgen_script.sh, (see below).
+    
+xspecgen_script.sh (NOT INCLUDED: auto-generated)
+    Description: Shell-script executing generated xspec-code for making fake spectra simulating 2D-observations of the cluster.
+    Input: 1666_3.pi, 1666_3.wrmf, 1666_3.warf: Data, response matrix and auxiliary response matrix needed in the 'fakeit' function in xspec.
     
 volumes.out
     File with volume of volume elements as a function of shell number and observation.

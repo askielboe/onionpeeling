@@ -1,7 +1,18 @@
+# FUNCTION DEFINITION
+proc func_b {a} {
+	set alpha 1.
+	set beta 1.
+	
+	# Define b(a) = a*(beta + alpha * a)
+	set b [expr $a*($beta + $alpha*$a)]
+	return $b
+}
+
 # Define constants
 set filenamein "shells.dat"
 set filenameout "volumes.out"
 set Pi 3.1415926535897932385
+set e 2.71828183
 
 # Define procedures
 proc Ve {rc a b} {
@@ -37,7 +48,7 @@ set i 1
 while {![eof $fin]} {
 	gets $fin line ; # Read line until we encounter a space (" ") and put into n
 	for {set count 0} {[string index $line $count]!=" "} {incr count} {
-		append n($i) [string index $line $count]
+		append a($i) [string index $line $count]
 	}
 	incr count ; # Skip the space.
 	while {[string index $line $count]>=-1} { ; # And read rest of line into m.
@@ -45,15 +56,7 @@ while {![eof $fin]} {
 		incr count
 	}
 	
-	# Define a(n), right now a = n
-	set a($i) [expr 1*$n($i)]
-	
-	# Define alpha(r) and beta(r)
-	set alpha($i) [expr 0.5*$n($i)]
-	set beta($i) [expr 1.*1.]
-	
-	# Define b(a) = a*(beta + alpha * a)
-	set b($i) [expr $a($i)*($beta($i) + $alpha($i)*$a($i))]
+	set b($i) [func_b $a($i)]
 	
 	if [eof $fin] break ;# otherwise loops one time too many
 	incr i
@@ -82,15 +85,28 @@ while {$in <= $i} {
 	incr in
 }
 
-# Write output to file $filenameout
-set fout [open $filenameout w]
-#puts $fout "a rc V(n,m) \n"
+# RESCALE VOLUMES
 set in 1
 while {$in <= $i} {
 	set im 1
 	while {$im <= $i} {	
 		if {$velement($in,$im) != 0} {
-			puts $fout "$in $im $velement($in,$im)"
+			set velement($in,$im) [expr $velement($in,$im)*1000]
+		}
+		incr im
+	}
+	incr in
+}
+
+# Write output to file $filenameout
+set fout [open $filenameout w]
+puts $fout "n m R         V(n,m)"
+set in 1
+while {$in <= $i} {
+	set im 1
+	while {$im <= $i} {	
+		if {$velement($in,$im) != 0} {
+			puts $fout "$in $im $a($in) $velement($in,$im) "
 		}
 		incr im
 	}
