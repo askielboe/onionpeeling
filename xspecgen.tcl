@@ -1,4 +1,4 @@
-# FUNCTION DEFINITIONS
+# FUNCTION & PARAMETER DEFINITIONS
 proc func_temp {R} {
 	set temp [expr -16.5*$R+10.]
 	return $temp
@@ -11,6 +11,8 @@ proc func_rho {R i} {
 	}
 	return $rho
 }
+set abundance 0.3
+set redshift 0.18
 
 # Script for generating xspec code
 # Takes as input the output from sphvol.tcl and the chosen cylinder-shell we would like to observe.
@@ -72,11 +74,11 @@ close $fin
 for {set iobs 1} {$iobs <= $nobs} {incr iobs} {
 	set fout [open xspecgen_script$iobs.xcm w]
 	# Initiate the model
-	puts $fout "model 1:fakemek mekal & $t(1) & $rho(1) & 0.3 & 0.18 & & $volume($iobs,$iobs) &"
+	puts $fout "model 1:fakemek mekal & $t(1) & $rho(1) & $abundance & $redshift & & $volume($iobs,$iobs) &"
 	if {[expr $nobs - $iobs] > 0} {
 		set modelno 2
 		for {set i [expr $iobs+1]} {$i <= $nobs} {incr i} {
-			puts $fout "addcomp fakemek:$modelno mekal & $t($i) & $rho($i) & 0.3 & 0.18 & & $volume($i,$iobs) &"
+			puts $fout "addcomp fakemek:$modelno mekal & $t($i) & $rho($i) & $abundance & $redshift & & $volume($i,$iobs) &"
 			incr modelno
 		}
 	}
