@@ -1,0 +1,11 @@
+Faking 2-D observations:
+
+First we generate a fake 2-D observation. This is done by selecting a temperature and density and then normalizing the spectra by the volume enclosed in the observation. The volume elements are calculated by the sphvol.tcl script, as a function of shell-number (increasing radially out from the center of the cluster) and observation number (the n=1 observation being only the core of the cluster, and observation n=N only includes the outermost shell, where N is the total number of shells selected for peeling).
+
+In the current version of the script genspectra.tcl (as of Nov 10) the fake spectra are named fm_shelln.fak, where n is the number of the observation.
+
+Onionpeeling:
+
+Now that observed spectra for all the shells have been generated, with normalization equal to the volume of the spectra-generating gas in question, we go on and try to decouple the data once again. This is done by the method of \emph{onionpeeling}.
+
+First we calculate 

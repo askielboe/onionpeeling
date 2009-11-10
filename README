@@ -2,11 +2,14 @@ sphvol.tcl
     Description: Calculates volume elements of spheroid given inputs. This script also defines the shape of the spheroids (clusters) as a function of radius (alpha(r)).
     Input: shells.dat, the a-values defining the spheroids.
     Output: volumes.out, list of the volumes of volume elements as a function of shell number and observation radius.
+    Notes (Nov 9):  The volumes are multiplied by 1000! (line 91).
+                    alpha is defined as alpha = b/a (line 10 + others).
     
 xspecgen.tcl
     Description: Program for generating the xspec script used to make fake spectra. This script also defines the temperature and density as a function of radius of the cluster.
     Input: volumes.out: using the volumes calculated by sphvol.tcl to make fake mekal spectra of the hot plasma weighted by the volumes. 
     Output: xspecgen_script(1-number of shells).xcm, xspecgen_script.sh, (see below).
+    Notes:  The norm is multiplied by 1000 (line 17).
     
 xspecgen_script.sh (NOT INCLUDED: auto-generated)
     Description: Shell-script executing generated xspec-code for making fake spectra simulating 2D-observations of the cluster.

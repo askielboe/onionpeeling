@@ -1,5 +1,10 @@
 proc genspectra { args } {
 	
+	if {$args == ""} {
+		puts "Syntax: genspectra <alpha-value>"
+		break
+	}
+	
 	# Read-in arguments RIGHT NOW ONLY ALPHA IS ALLOWED
 	set alpha $args
 	
@@ -8,14 +13,17 @@ proc genspectra { args } {
 		set temp [expr -16.5*$R+10.]
 		return $temp
 	}
-	proc func_rho {R i} {
+	proc func_norm {R i} {
 		if {$i < 4} {
-			set rho 0.008
+			set norm 0.008
 		} else {
-			set rho [expr pow($R*100,-2.)+0.003]
+			set norm [expr pow($R*100,-2.)+0.003]
 		}
-		return $rho
+		set upscalednorm [expr $norm*1000.] ; # UP-SCALING THE HYDROGEN NUMBER DENSITY OR NORM
+		return $upscalednorm
 	}
+	
+	set nH 1
 	set abundance 0.3
 	set redshift 0.18
 
@@ -38,7 +46,7 @@ proc genspectra { args } {
 		set t($i) [func_temp $R($i)]
 	
 		# Define density as a function of radius rho(R)
-		set rho($i) [func_rho $R($i) $i]
+		set norm($i) [func_norm $R($i) $i]
 	
 		incr i
 	}
@@ -56,15 +64,22 @@ proc genspectra { args } {
 	# Syntax: addcomp [Model Name:]<new component number> componentName
 	for {set iobs 1} {$iobs <= $nobs} {incr iobs} {
 		# Initiate the model
-		model 1:fakemek mekal & $t(1) & $rho(1) & $abundance & $redshift & & $volumes($iobs,$iobs) &
+		model 1:fakemek mekal*constant & $t(1) & $nH & $abundance & $redshift & & $norm(1) & $volumes($iobs,$iobs) &
 		if {[expr $nobs - $iobs] > 0} {
-			set modelno 2
+			set modelno 3
 			for {set i [expr $iobs+1]} {$i <= $nobs} {incr i} {
-				addcomp fakemek:$modelno mekal & $t($i) & $rho($i) & $abundance & $redshift & & $volumes($i,$iobs) &
+				addcomp fakemek:$modelno mekal & $t($i) & $nH & $abundance & $redshift & & $norm($i) &
+				incr modelno
+				addcomp fakemek:$modelno constant & $volumes($i,$iobs) &
 				incr modelno
 			}
 		}
 		data 1666_3.pi
 		fakeit & y & & fm_shell$iobs.fak & &
+		puts "DATA FAKED!!"
+		puts "DATA FAKED!!"
+		puts "OUTPUT: fm_shell$iobs.fak"
+		puts "DATA FAKED!!"
+		puts "DATA FAKED!!"
 	}
 }
