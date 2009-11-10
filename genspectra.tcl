@@ -64,7 +64,7 @@ proc genspectra { args } {
 	# Syntax: addcomp [Model Name:]<new component number> componentName
 	for {set iobs 1} {$iobs <= $nobs} {incr iobs} {
 		# Initiate the model
-		model 1:fakemek mekal*constant & $t(1) & $nH & $abundance & $redshift & & $norm(1) & $volumes($iobs,$iobs) &
+		model 1:fakemek mekal*constant & $t($iobs) & $nH & $abundance & $redshift & & $norm($iobs) & $volumes($iobs,$iobs) &
 		if {[expr $nobs - $iobs] > 0} {
 			set modelno 3
 			for {set i [expr $iobs+1]} {$i <= $nobs} {incr i} {
