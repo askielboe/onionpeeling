@@ -70,6 +70,7 @@ proc peeling { args } {
 				puts "------------------------------------------------------------"
 				puts "Subtracting $volfrac*sub_shell$n.fak from sub_shell$ishell.fak"
 				puts "------------------------------------------------------------"
+				# Exposuretime: 4.18E4
 				if {$n == $nshells} {
 					mathpha sub_shell$ishell.fak-$volfrac*fm_shell$n.fak R sub_shell.tmp sub_shell$ishell.fak NULL 0
 				} else {

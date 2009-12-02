@@ -11,6 +11,8 @@ proc genspectra { args } {
 	# FUNCTION & PARAMETER DEFINITIONS
 	proc func_temp {R} {
 		set temp [expr -16.5*$R+10.]
+		# Martina temperature function:
+		#set temp [expr -10.*$R+10.]
 		return $temp
 	}
 	proc func_norm {R i} {
@@ -19,6 +21,8 @@ proc genspectra { args } {
 		} else {
 			set norm [expr pow($R*100,-2.)+0.003]
 		}
+		# Martina density function:
+		# set norm [expr pow(1/(1+pow($R/0.15,2.)),2.)]
 		set upscalednorm [expr $norm*1000.] ; # UP-SCALING THE HYDROGEN NUMBER DENSITY OR NORM
 		return $upscalednorm
 	}
@@ -76,10 +80,10 @@ proc genspectra { args } {
 		}
 		data 1666_3.pi
 		fakeit & y & & fm_shell$iobs.fak & &
-		puts "DATA FAKED!!"
-		puts "DATA FAKED!!"
+		puts "DATA FAKED!"
 		puts "OUTPUT: fm_shell$iobs.fak"
-		puts "DATA FAKED!!"
-		puts "DATA FAKED!!"
 	}
+	# for {set i 1} {$i < 8} {incr i} {
+	# 	puts $norm($i)
+	# }
 }
