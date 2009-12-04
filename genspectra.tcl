@@ -10,7 +10,8 @@ proc genspectra { args } {
 	
 	# FUNCTION & PARAMETER DEFINITIONS
 	proc func_temp {R} {
-		set temp [expr -16.5*$R+10.]
+		set temp [expr 1.35*pow($R/0.045,1.9)+0.45)/(pow($R/0.045,1.9)+1.)/pow(1+pow($R/0.6,2.),0.45)]
+		#set temp [expr -16.5*$R+10.]
 		# Martina temperature function:
 		#set temp [expr -10.*$R+10.]
 		return $temp

@@ -1,0 +1,1 @@
+plot 'chi_vs_alpha.txt'

@@ -114,6 +114,9 @@ proc peeling { args } {
 	}
 	close $fout
 	
+	# Plot reduced chi-square as a function of alpha using gnuplot as defined in plot.gp
+	exec gnuplot -persist plot.gp
+	
 	# # Find the alpha value corresponding to the best fit
 	# set minindex 1
 	# set chimin $chisquare(1,1)
