@@ -25,13 +25,24 @@ proc peeling { args } {
 		set chisquare [expr [tcloutr stat]/$dof]
 		return $chisquare
 	}
+	proc getpar { args } {
+		set par 1
+		unset par
+		for {set count 0} {[string index [tcloutr par $args] $count]!=" "} {incr count} {
+			append par [string index [tcloutr par $args] $count]
+		}
+		return $par
+	}
 	
 	# Calculate number of shells from lines in shells.dat
 	set filenameradii "shells.dat"
 	set fradii [open $filenameradii r]
 	set i 1
 	while {![eof $fradii]} {
-		gets $fradii line 
+		gets $fradii line
+		for {set count 0} {[string index $line $count]!=" "} {incr count} {
+			append radius($i) [string index $line $count]
+		}
 		incr i
 	}
 	close $fradii
@@ -56,6 +67,8 @@ proc peeling { args } {
 		fit 100 ; # Do the fit using atmost 100 iterations
 		# Get the reduced chi-square af a function of iteration (i) and shell (ishell)
 		set chisquare($i,$ishell) getchisquare
+		set fit_temp($i,$ishell) [getpar 1]
+		set fit_normval($i,$ishell) [getpar 6]
 
 		# Then peel the rest of the shells while fitting with the given alpha-value
 		for {set ishell [expr $nshells-1]} {$ishell >= 1} {set ishell [expr $ishell-1]} {
@@ -78,26 +91,22 @@ proc peeling { args } {
 				}
 				exec rm sub_shell$ishell.fak
 				exec mv sub_shell.tmp sub_shell$ishell.fak
-				# # Plot the data to see whats going on
-				# data sub_shell$ishell.fak
-				# pl da
-				# gets stdin dummyvar
-				# if {$dummyvar == 1} {
-				# 	break
-				# }
 			}
 			# Do a fit with the volume corresponding to the shell of interest
 			data sub_shell$ishell.fak
 			response 1666_3.wrmf
 			arf 1666_3.warf
 			newpar 7 $volumes($ishell,$ishell)
-			# freeze fakemek$ishell:7 ; # Freeze the volume
+			freeze 7 ; # Freeze the volume
 			puts "----------------------------------------------------------"
 			puts "Fitting sub_shell$ishell.fak using volume $volumes($ishell,$ishell)"
 			puts "----------------------------------------------------------"
 			fit 100 ; # Do the fit using atmost 100 iterations
 			# Get the reduced chi-square af a function of iteration (i) and shell (ishell)
 			set meanchitemp [expr $meanchitemp + [getchisquare]]
+			# Get parameters
+			set fit_temp($i,$ishell) [getpar 1]
+			set fit_norm($i,$ishell) [getpar 6]
 		}
 		# Save alpha value as a function of iteration (i) and calculate mean chi-square
 		set nalpha($i) $alpha
@@ -105,70 +114,48 @@ proc peeling { args } {
 		incr i
 	}
 	
+	# Find the alpha value corresponding to the best fit
+	set minindex 1
+	set chimin $meanchi(1)
+	for {set n 2} {$n < $i} {incr n} {
+		if {$meanchi($n) < $chimin} {
+			set chimin $meanchi($n)
+			set imin $n
+		}
+	}
+	
+	# Print the results
+	puts "=================================== RESULTS ===================================="
+	puts "Best fit achieved for alpha = $nalpha($imin). Here the reduced chi-square was = $meanchi($imin)."
+	
 	# Print mean chi's and alpha's
 	# Make a file with meanchisquare as a function of alpha for external plotting
 	set fout [open chi_vs_alpha.txt w]
 	for {set n 1} {$n < $i} {incr n} {
-		puts "Mean reduced chi-square = $meanchi($n) for Alpha = $nalpha($n)"
+		# puts "Mean reduced chi-square = $meanchi($n) for Alpha = $nalpha($n)"
 		puts $fout "$nalpha($n) $meanchi($n)"
+	}
+	close $fout
+
+	# Write temperature profile for best fit to file
+	set fout [open temp_vs_radius.txt w]
+	for {set n 1} {$n < $nshells} {incr n} {
+		puts "$radius($n) $fit_temp($imin,$n)"
+		puts $fout "$radius($n) $fit_temp($imin,$n)"
+	}
+	close $fout
+	
+	# Write density (norm) profile for best fit to file
+	set fout [open norm_vs_radius.txt w]
+	for {set n 1} {$n < $nshells} {incr n} {
+		puts "$radius($n) $fit_norm($imin,$n)"
+		puts $fout "$radius($n) $fit_norm($imin,$n)"
 	}
 	close $fout
 	
 	# Plot reduced chi-square as a function of alpha using gnuplot as defined in plot.gp
-	exec gnuplot -persist plot.gp
-	
-	# # Find the alpha value corresponding to the best fit
-	# set minindex 1
-	# set chimin $chisquare(1,1)
-	# for {set n 2} {$n < $i} {incr n} {
-	# 	puts "Chi-square = $chisquare($n), chimin = $chimin"
-	# 	if {$chisquare($n) < $chimin} {
-	# 		set chimin $chisquare($n)
-	# 		set imin $n
-	# 		puts "NEW MINIMUM FOUND!"
-	# 	}
-	# }
-	# 
-	# 
-	# set fout [open vol_vs_alpha.txt w]
-	# for {set n 1} {$n < $i} {incr n} {
-	# 	puts $fout "$nalpha($n) $param_vol($n) $param_vol_error($n)"
-	# }
-	# close $fout
-	# 
-	# set fout [open temp_vs_alpha.txt w]
-	# for {set n 1} {$n < $i} {incr n} {
-	# 	puts $fout "$nalpha($n) $param_temp($n) $param_temp_error($n)"
-	# }
-	# close $fout
-	# 
-	# set fout [open norm_vs_alpha.txt w]
-	# for {set n 1} {$n < $i} {incr n} {
-	# 	puts $fout "$nalpha($n) $param_norm($n) $param_norm_error($n)"
-	# }
-	# close $fout
-	# 
-	# # Print the results
-	# puts "Best fit achieved for alpha = $nalpha($imin). Here the reduced chi-square was = $chisquare($imin)."
-	# puts "Parameters for best fit:"
-	# puts "Temperature kT = $param_temp($imin)"
-	# puts "Density nH = $param_rho($imin)"
-	# puts "Normalization (volume) HVAD ER ENHEDEN??? = $param_norm($imin)"
-	# 
-	# # Wait for user to press any key
-	# puts "Press any key to start the onionpeeling..."
-	# gets stdin ans
-	
-	# # Print out results of the fits TO THE SCREEN
-	# for {set n 1} {$n < $i} {incr n} {
-	# 	puts "$n: Alpha = $nalpha($n), Reduced Chi-Square = $chisquare($n)"
-	# }
-	# 
-	# # Print out results of the fits TO A FILE
-	# set fout [open alphafits.txt w]
-	# for {set n 1} {$n < $i} {incr n} {
-	# 	puts $fout "$n: Alpha = $nalpha($n), Reduced Chi-Square = $chisquare($n)"
-	# }
+	exec gnuplot -persist plot_chi.gp
+	exec gnuplot -persist plot_temp.gp
 }
 
 
