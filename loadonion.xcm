@@ -1,3 +1,6 @@
+@common.tcl
 @sphvol.tcl
 @genspectra.tcl
+@genspectra2.tcl
 @peeling.tcl
+@montecarlo.tcl

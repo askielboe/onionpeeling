@@ -7,7 +7,7 @@ proc sphvol { args } {
 		set beta 1.
 	
 		# Define b(a) = a*(beta + alpha * a)
-		set b [expr $a*($beta + $alpha*$a)]
+		set b [expr $a*($beta - $alpha*$a)]
 		return $b
 	}
 
@@ -53,18 +53,26 @@ proc sphvol { args } {
 		for {set count 0} {[string index $line $count]!=" "} {incr count} {
 			append a($i) [string index $line $count]
 		}
-		incr count ; # Skip the space.
-		while {[string index $line $count]>=-1} { ; # And read rest of line into m.
-			append m($i) [string index $line $count]
-			incr count
-		}
-	
-		set b($i) [func_b $a($i) $alpha]
-	
+		# incr count ; # Skip the space.
+		# while {[string index $line $count]>=-1} { ; # And read rest of line into m.
+		# 	append m($i) [string index $line $count]
+		# 	incr count
+		# }
+		
 		if [eof $fin] break ;# otherwise loops one time too many
 		incr i
 	}
 	close $fin
+	
+	# Normalize shells
+	for {set n 1} {$n <= $i} {incr n} {
+		set a($n) [expr $a($n)/$a($i)]
+	}
+	
+	# And now we can set b
+	for {set n 1} {$n <= $i} {incr n} {
+		set b($n) [func_b $a($n) $alpha]
+	}
 
 	# Calculate volume elements velement(n,m)
 	set in 1
@@ -72,34 +80,34 @@ proc sphvol { args } {
 		set im 1
 		while {$im <= $i} {
 			# Don't try and calculate if any var is 0 or if rc > a.
-			if {$m($im) == 0 || $a($in) == 0 || $b($in) == 0 || $m($im) > $a($in)} {
-				set velement($in,$im) 0 
+			if {$a($im) == 0 || $a($in) == 0 || $b($in) == 0 || $a($im) > $a($in)} {
+				set velement($in,$im) 0
 			} elseif {$in == 1 && $im == 1} { ; # Don't subtract in the innermost shell.
-				set velement($in,$im) [Vcut $m(1) $a(1) $b(1)]
+				set velement($in,$im) [Vcut $a(1) $a(1) $b(1)]
 			} elseif {$in == 1} { ; # For n = 1 only subtract inner cuts.
-				set velement($in,$im) [expr [Vcut $m($im) $a($in) $b($in)] - [Vcut $m([expr $im-1]) $a($in) $b($in)]]
+				set velement($in,$im) [expr [Vcut $a($im) $a($in) $b($in)] - [Vcut $a([expr $im-1]) $a($in) $b($in)]]
 			} elseif {$im == 1} { ; # For m = 1 only subtract inner spheroids.
-				set velement($in,$im) [Vshell $m($im) $a($in) $b($in) $a([expr $in-1]) $b([expr $in-1])]
+				set velement($in,$im) [Vshell $a($im) $a($in) $b($in) $a([expr $in-1]) $b([expr $in-1])]
 			} else { ; # For anything else, subtract both.
-				set velement($in,$im) [expr [Vshell $m($im) $a($in) $b($in) $a([expr $in-1]) $b([expr $in-1])] - [Vshell $m([expr $im-1]) $a($in) $b($in) $a([expr $in-1]) $b([expr $in-1])]]
+				set velement($in,$im) [expr [Vshell $a($im) $a($in) $b($in) $a([expr $in-1]) $b([expr $in-1])] - [Vshell $a([expr $im-1]) $a($in) $b($in) $a([expr $in-1]) $b([expr $in-1])]]
 			}
 			incr im
 		}
 		incr in
 	}
 
-	# RESCALE VOLUMES
-	set in 1
-	while {$in <= $i} {
-		set im 1
-		while {$im <= $i} {	
-			if {$velement($in,$im) != 0} {
-				set velement($in,$im) [expr $velement($in,$im)*1000]
-			}
-			incr im
-		}
-		incr in
-	}
+	# # RESCALE VOLUMES
+	# set in 1
+	# while {$in <= $i} {
+	# 	set im 1
+	# 	while {$im <= $i} {	
+	# 		if {$velement($in,$im) != 0} {
+	# 			set velement($in,$im) [expr $velement($in,$im)*1000]
+	# 		}
+	# 		incr im
+	# 	}
+	# 	incr in
+	# }
 
 	# # Write output to file $filenameout
 	# set fout [open $filenameout w]
