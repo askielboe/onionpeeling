@@ -7,7 +7,8 @@ proc sphvol { args } {
 		set beta 1.
 	
 		# Define b(a) = a*(beta + alpha * a)
-		set b [expr $a*($beta - $alpha*$a)]
+		set b [expr $a*($beta + $alpha*$a)] ; # Spherical center, elliptical exterior
+		# set b [expr $a*(1 + $alpha - $alpha*$a)] ; # Elliptic center, spherical exterior
 		return $b
 	}
 
@@ -44,7 +45,6 @@ proc sphvol { args } {
 		set vshell [expr [Vcut $rc $a $b] - [Vcut $rc $amin $bmin]]
 		return $vshell
 	}
-
 	# Read in list with n's and m's.
 	set fin [open $filenamein r]
 	set i 1

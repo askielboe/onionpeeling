@@ -1,4 +1,4 @@
-proc peeling { argmin argmax argstep } {
+proc peelingfake { args } {
 	
 	# Define parameters
 	set t(1) 1.
@@ -9,12 +9,15 @@ proc peeling { argmin argmax argstep } {
 	
 	# First we select a step-size and fitting range for alpha
 	set alpha 1.
-	set alphamin $argmin
-	set alphamax $argmax
-	set alphastep $argstep
+	set alphamin 0.2
+	set alphamax 0.8
+	set alphastep 0.1
 	
 	# change the weighting to provide a better estimate of the variance in the small number limit.
-	weight churazov
+	# set data weighting
+	#     Syntax:weight [ churazov | gehrels | model | standard  ]
+	# weight churazov
+	weight model
 	
 	# Calculate number of shells from lines in shells.dat
 	set filenameradii "shells.dat"
@@ -42,7 +45,7 @@ proc peeling { argmin argmax argstep } {
 		# Start by fitting the outermost shell (ishell = nshells)
 		set ishell $nshells
 		set meanchitemp 0
-		data 1666_$ishell.pi
+		data fm_shell$ishell.fak
 		# Define mekal model from volume and name is after the shell (fakemekSHELLNUMBER)
 		model mekal*constant & $t(1) & $nH & $abundance & $redshift & & $norm(1) & $volumes($ishell,$ishell) &
 		freeze 7 ; # Freeze the volume
@@ -59,7 +62,7 @@ proc peeling { argmin argmax argstep } {
 		# Then peel the rest of the shells while fitting with the given alpha-value
 		for {set ishell [expr $nshells-1]} {$ishell >= 1} {set ishell [expr $ishell-1]} {
 			# Copy the original spectra to the one we will subtract from
-			exec cp 1666_$ishell.pi sub_shell$ishell.fak
+			exec cp fm_shell$ishell.fak sub_shell$ishell.fak
 			data sub_shell$ishell.fak
 			# Subtract the outer-lying spectra using mathpha
 			for {set n $nshells} {$n > $ishell} {set n [expr $n-1]} {
@@ -71,16 +74,17 @@ proc peeling { argmin argmax argstep } {
 				puts "------------------------------------------------------------"
 				# Exposuretime: 4.18E4, properr=’yes’ ?
 				if {$n == $nshells} {
-					mathpha expr=sub_shell$ishell.fak-$volfrac*1666_$n.pi outfil=!sub_shell.tmp units=R properr=yes areascal=sub_shell$ishell.fak exposure=sub_shell$ishell.fak ncomments=0
+					mathpha expr=sub_shell$ishell.fak-$volfrac*fm_shell$n.fak outfil=!sub_shell.tmp units=R properr=yes areascal=sub_shell$ishell.fak exposure=sub_shell$ishell.fak ncomments=0
 				} else {
 					mathpha expr=sub_shell$ishell.fak-$volfrac*sub_shell$n.fak outfil=!sub_shell.tmp units=R properr=yes areascal=sub_shell$ishell.fak exposure=sub_shell$ishell.fak ncomments=0
 				}
+				exec rm sub_shell$ishell.fak
 				exec mv sub_shell.tmp sub_shell$ishell.fak
 			}
 			# Do a fit with the volume corresponding to the shell of interest
 			data sub_shell$ishell.fak
-			response 1666_$ishell.wrmf
-			arf 1666_$ishell.warf
+			response 1666_3.wrmf
+			arf 1666_3.warf
 			newpar 7 $volumes($ishell,$ishell)
 			freeze 7 ; # Freeze the volume
 			# ignore 1:0-20

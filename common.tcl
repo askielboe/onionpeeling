@@ -23,3 +23,13 @@ proc getpar { args } {
 	}
 	return $par
 }
+
+proc geterror { args } {
+	set error 1
+	unset error
+	set error [tcloutr sigma $args]
+	# for {set count 0} {[string index [tcloutr sigma $args] $count]!=EOL} {incr count} {
+	# 	append par [string index [tcloutr sigma $args] $count]
+	# }
+	return $error
+}
